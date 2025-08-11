@@ -20,9 +20,18 @@
     "start": "concurrently \"npm run backend:start\" \"npm run frontend:start\""
   },
   "devDependencies": {
-    "concurrently": "^7.6.0"
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^7.6.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.3.2"
   },
-  "keywords": ["ecommerce", "fullstack", "react", "nodejs", "postgresql"],
+  "keywords": [
+    "ecommerce",
+    "fullstack",
+    "react",
+    "nodejs",
+    "postgresql"
+  ],
   "author": "",
   "license": "MIT"
 }

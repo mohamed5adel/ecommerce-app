@@ -24,6 +24,7 @@ function App() {
           <div className="App">
             <Navbar />
             <main className="container mx-auto px-4 py-8">
+
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/products" element={<Products />} />
@@ -31,21 +32,21 @@ function App() {
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route 
-                  path="/profile" 
+                <Route
+                  path="/profile"
                   element={
                     <PrivateRoute>
                       <Profile />
                     </PrivateRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/orders" 
+                <Route
+                  path="/orders"
                   element={
                     <PrivateRoute>
                       <Orders />
                     </PrivateRoute>
-                  } 
+                  }
                 />
               </Routes>
             </main>
