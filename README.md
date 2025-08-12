@@ -1,290 +1,313 @@
-# E-Commerce Full-Stack Application
+# DevOps Demo Project: Local Development to AWS k3s Deployment
 
-A complete e-commerce web application built with React frontend and Node.js backend, featuring user authentication, product management, shopping cart, and order processing.
+A complete DevOps-ready project that demonstrates the journey from local development to production deployment on AWS using k3s on EC2 (Free Tier friendly).
 
-## Features
+## 🏗️ Architecture Overview
 
-- **User Authentication**: JWT-based login/register system with protected routes
-- **Product Management**: Browse, search, and filter products with pagination
-- **Shopping Cart**: Persistent cart functionality with quantity management
-- **Order Processing**: Complete checkout flow with order history
-- **Admin Panel**: Product management for administrators
-- **Responsive Design**: Mobile-first responsive UI
-- **AWS S3 Integration**: Product image upload and storage
+This project implements a modern DevOps pipeline with:
+- **Local Development**: Docker Compose with Node.js backend + PostgreSQL
+- **Containerization**: Multi-stage Docker builds
+- **Infrastructure as Code**: Terraform for AWS resources
+- **Kubernetes**: k3s cluster on EC2 (lightweight K8s)
+- **CI/CD**: GitHub Actions for automated deployment
+- **Monitoring**: Prometheus + Grafana stack
+- **Cost Optimization**: Free Tier eligible AWS resources
 
-## Tech Stack
-
-- **Frontend**: React 18, React Router, Axios, React Toastify
-- **Backend**: Node.js, Express, Sequelize ORM, JWT Authentication
-- **Database**: PostgreSQL
-- **File Storage**: AWS S3
-- **Containerization**: Docker & Docker Compose
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-root/
-├── backend/
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── migrations/
-│   │   └── seeders/
-│   ├── package.json
-│   ├── Dockerfile
-│   └── .env.example
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── services/
-│   ├── package.json
-│   └── .env.example
-├── postgres-data/
-├── docker-compose.yml
-└── README.md
+├── app/                          # Node.js backend application
+│   ├── server.js                # Express server with health checks
+│   ├── package.json             # Dependencies and scripts
+│   └── Dockerfile               # Multi-stage production build
+├── k8s/manifests/               # Kubernetes manifests
+│   ├── deployment.yaml          # App deployment with probes
+│   ├── service.yaml             # ClusterIP and NodePort services
+│   ├── ingress-nginx.yaml       # NGINX Ingress Controller
+│   ├── hpa.yaml                 # Horizontal Pod Autoscaler
+│   ├── configmap.yaml           # Application configuration
+│   ├── secret-template.yaml     # Secrets and PostgreSQL
+│   └── monitoring.yaml          # Prometheus + Grafana
+├── infra/terraform/              # Infrastructure as Code
+│   ├── main.tf                  # Main Terraform configuration
+│   ├── variables.tf             # Variable definitions
+│   ├── outputs.tf               # Output values
+│   ├── user_data.sh             # k3s installation script
+│   └── terraform.tfvars.example # Example variables
+├── .github/workflows/            # CI/CD pipelines
+│   ├── ci-cd.yml                # Build and deploy workflow
+│   └── terraform.yml            # Infrastructure workflow
+├── docker-compose.yml            # Local development setup
+├── init.sql                      # Database initialization
+└── env.example                   # Environment variables template
 ```
 
-## Prerequisites
+## 🚀 Quick Start
 
-- Node.js 18+ and npm
-- Docker and Docker Compose
-- AWS S3 bucket (for image uploads)
+### Prerequisites
 
-## Quick Start
+- **Docker & Docker Compose** (for local development)
+- **Terraform** (for infrastructure)
+- **kubectl** (for Kubernetes management)
+- **AWS CLI** (for AWS operations)
+- **SSH key pair** in AWS
 
-### 1. Clone the repository
+### 1. Local Development
 
 ```bash
-git clone <https://github.com/mohamed5adel/ecommerce-app.git>
-cd ecommerce-app
+# Clone the repository
+git clone <your-repo-url>
+cd devops-demo
+
+# Copy environment variables
+cp env.example .env
+# Edit .env with your values
+
+# Start local development environment
+docker-compose up --build
+
+# Test the application
+curl http://localhost:3000/health
+curl http://localhost:3000/db-health
 ```
 
-### 2. Start PostgreSQL Database
+**Local Services:**
+- **App**: http://localhost:3000
+- **PostgreSQL**: localhost:5432
+- **pgAdmin**: http://localhost:8080 (admin@example.com / admin)
+
+### 2. Build Docker Image
 
 ```bash
-# Start the database
-docker-compose up -d
+# Build the application image
+docker build -t devops-demo-app:latest ./app
 
-# Stop the database
-docker-compose down
+# Test the image locally
+docker run -p 3000:3000 devops-demo-app:latest
 ```
 
-### 3. Backend Setup
+### 3. Deploy Infrastructure
 
 ```bash
-cd backend
+# Navigate to Terraform directory
+cd infra/terraform
 
-# Install dependencies
-npm install
+# Copy and configure variables
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
 
-# Create .env file from example
-cp .env.example .env
+# Initialize Terraform
+terraform init
 
-# Edit .env with your configuration
-# Required variables:
-# - Database credentials (DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
-# - JWT secret (JWT_SECRET, JWT_EXPIRES_IN)
-# - AWS S3 credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, S3_BUCKET)
-# - Server config (NODE_ENV, PORT)
+# Plan the deployment
+terraform plan
 
-# Run database migrations
-npm run migrate
+# Apply the infrastructure
+terraform apply
 
-# Seed the database with sample data
-npm run seed
-
-# Start the backend server
-npm run dev
+# Get outputs
+terraform output
 ```
 
-The backend will be available at `http://localhost:5000`
+**Expected Outputs:**
+- EC2 instance public IP
+- SSH command
+- kubectl configuration command
 
-### 4. Frontend Setup
+### 4. Access k3s Cluster
 
 ```bash
-cd frontend
+# SSH to the instance
+ssh -i ~/.ssh/your-key.pem ec2-user@<INSTANCE_IP>
 
-# Install dependencies
-npm install
+# Copy kubeconfig to local machine
+scp -i ~/.ssh/your-key.pem ec2-user@<INSTANCE_IP>:/etc/rancher/k3s/k3s.yaml ~/.kube/config
 
-# Create .env file from example
-cp .env.example .env
-
-# Edit .env with backend API URL
-REACT_APP_API_URL=http://localhost:5000
-
-# Start the frontend development server
-npm start
+# Test cluster access
+kubectl get nodes
+kubectl get pods -A
 ```
 
-The frontend will be available at `http://localhost:3000`
+### 5. Deploy Application
 
-## Environment Variables
+```bash
+# Apply Kubernetes manifests
+kubectl apply -f k8s/manifests/
 
-### Backend (.env)
+# Check deployment status
+kubectl rollout status deployment/devops-demo-app
+kubectl get pods -l app=devops-demo-app
 
-```env
-# Database Configuration
+# Access the application
+# Replace <INSTANCE_IP> with your EC2 public IP
+curl http://<INSTANCE_IP>:30000/health
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Copy `env.example` to `.env` and configure:
+
+```bash
+# Application
+NODE_ENV=development
+PORT=3000
+
+# Database
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=myuser
-DB_PASSWORD=mypassword
-DB_NAME=mydb
+DB_NAME=myapp
+DB_USER=postgres
+DB_PASSWORD=password
 
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-change-in-production
-JWT_EXPIRES_IN=24h
-
-# AWS S3 Configuration
-AWS_ACCESS_KEY_ID=your-aws-access-key
-AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+# AWS (for production)
 AWS_REGION=us-east-1
-S3_BUCKET=your-s3-bucket-name
-
-# Server Configuration
-NODE_ENV=development
-PORT=5000
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
 ```
 
-### Frontend (.env)
+### Terraform Variables
 
-```env
-REACT_APP_API_URL=http://localhost:5000
+Copy `terraform.tfvars.example` to `terraform.tfvars`:
+
+```hcl
+aws_region = "us-east-1"
+project_name = "devops-demo"
+instance_type = "t3.micro"  # Free Tier
+key_name = "your-key-pair-name"
+ssh_cidr = "YOUR_IP/32"  # Your IP address
 ```
 
-## Database Configuration
+## 📊 Monitoring & Observability
 
-The PostgreSQL database is configured with:
-- **Service name**: postgres
-- **Host**: localhost (or postgres in Docker)
-- **Port**: 5432
-- **Database**: mydb
-- **Username**: myuser
-- **Password**: mypassword
+### Prometheus
+- **URL**: http://<INSTANCE_IP>:30090
+- **Purpose**: Metrics collection and alerting
 
-## Demo Accounts
+### Grafana
+- **URL**: http://<INSTANCE_IP>:30300
+- **Credentials**: admin / admin
+- **Purpose**: Metrics visualization and dashboards
 
-After running the seed script, you'll have access to:
+### Application Health Checks
+- **Health**: http://<INSTANCE_IP>:30000/health
+- **Database**: http://<INSTANCE_IP>:30000/db-health
 
-- **Admin User**: admin@example.com / admin123
-- **Regular User**: user@example.com / user123
+## 🚀 CI/CD Pipeline
 
-## API Endpoints
+### GitHub Actions Setup
 
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
+1. **Repository Secrets** (Settings → Secrets and variables → Actions):
+   ```
+   AWS_ACCESS_KEY_ID=your_aws_key
+   AWS_SECRET_ACCESS_KEY=your_aws_secret
+   KUBE_CONFIG=base64_encoded_kubeconfig
+   ```
 
-### Products
-- `GET /api/products` - Get products with search/pagination
-- `GET /api/products/:id` - Get single product
-- `POST /api/products` - Create product (admin only)
-- `PUT /api/products/:id` - Update product (admin only)
-- `DELETE /api/products/:id` - Delete product (admin only)
+2. **Repository Variables** (Settings → Secrets and variables → Actions):
+   ```
+   AWS_REGION=us-east-1
+   USE_ECR=false
+   ECR_REPOSITORY_NAME=devops-demo-app
+   ```
 
-### Orders
-- `GET /api/orders` - Get user orders
-- `GET /api/orders/:id` - Get single order
-- `POST /api/orders` - Create order
-- `PATCH /api/orders/:id/status` - Update order status
+### Pipeline Triggers
 
-### Users
-- `GET /api/users/profile` - Get user profile
-- `PUT /api/users/profile` - Update user profile
+- **Push to main**: Automatic build, test, and deploy
+- **Pull Request**: Build and test only
+- **Manual**: Use workflow dispatch for specific operations
 
-## Available Scripts
+## 💰 Cost Optimization
 
-### Backend
-- `npm start` - Start production server
-- `npm run dev` - Start development server with nodemon
-- `npm run migrate` - Run database migrations
-- `npm run seed` - Seed database with sample data
+### Free Tier Eligibility
 
-### Frontend
-- `npm start` - Start development server
-- `npm run build` - Build for production
-- `npm test` - Run tests
+- **EC2**: t3.micro (750 hours/month)
+- **EBS**: 30GB/month
+- **Data Transfer**: 15GB/month
+- **Estimated Cost**: $0.00/month (Free Tier)
 
-## Docker Deployment
+### Production Considerations
 
-### Backend Container
+- Use larger instance types for production workloads
+- Consider EKS for production Kubernetes
+- Implement proper backup strategies
+- Use RDS for production databases
+
+## 🧹 Cleanup
+
+### Destroy Infrastructure
 
 ```bash
-cd backend
-docker build -t ecommerce-backend .
-docker run -p 5000:5000 --env-file .env ecommerce-backend
+cd infra/terraform
+terraform destroy
 ```
 
-### Full Stack with Docker Compose
+### Clean Local Environment
 
-Create a `docker-compose.full.yml` for the complete application:
+```bash
+# Stop and remove containers
+docker-compose down -v
 
-```yaml
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydb
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./postgres-data:/var/lib/postgresql/data
-
-  backend:
-    build: ./backend
-    ports:
-      - "5000:5000"
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=myuser
-      - DB_PASSWORD=mypassword
-      - DB_NAME=mydb
-    depends_on:
-      - postgres
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=http://localhost:5000
-    depends_on:
-      - backend
+# Remove images
+docker rmi devops-demo-app:latest
 ```
 
-## Troubleshooting
+## 🔍 Troubleshooting
 
-### Database Connection Issues
-- Ensure PostgreSQL container is running: `docker-compose ps`
-- Check database credentials in `.env` file
-- Verify database is accessible: `docker-compose exec postgres psql -U myuser -d mydb`
+### Common Issues
 
-### Frontend API Issues
-- Verify backend is running on port 5000
-- Check `REACT_APP_API_URL` in frontend `.env`
-- Ensure CORS is properly configured
+1. **EC2 Instance Not Starting**
+   - Check security group rules
+   - Verify key pair exists
+   - Check instance type availability in region
 
-### AWS S3 Issues
-- Verify AWS credentials in backend `.env`
-- Check S3 bucket permissions
-- Ensure bucket region matches `AWS_REGION`
+2. **k3s Installation Fails**
+   - Check user data script logs
+   - Verify internet connectivity
+   - Check instance resources
 
-## Contributing
+3. **Application Not Accessible**
+   - Verify NodePort services
+   - Check security group rules
+   - Verify pod status
+
+### Debug Commands
+
+```bash
+# Check pod logs
+kubectl logs -l app=devops-demo-app
+
+# Check pod status
+kubectl describe pod -l app=devops-demo-app
+
+# Check service endpoints
+kubectl get endpoints
+
+# Check ingress status
+kubectl get ingress
+```
+
+## 📚 Additional Resources
+
+- [k3s Documentation](https://docs.k3s.io/)
+- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Prometheus Documentation](https://prometheus.io/docs/)
+- [Grafana Documentation](https://grafana.com/docs/)
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
+4. Test locally with docker-compose
 5. Submit a pull request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+**Note**: This is a demo project for learning purposes. For production use, implement proper security measures, backup strategies, and monitoring solutions.
