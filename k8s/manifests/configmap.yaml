@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    app: devops-demo-app
+data:
+  # Database configuration
+  db_host: "postgres-service"
+  db_port: "5432"
+  db_name: "myapp"
+  
+  # Application configuration
+  app_name: "DevOps Demo App"
+  app_version: "1.0.0"
+  
+  # Logging configuration
+  log_level: "info"
+  log_format: "json"
+
