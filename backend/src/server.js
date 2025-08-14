@@ -20,9 +20,19 @@ app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/users', require('./routes/users'));
 
-// Health check
+// Health check for API
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'E-commerce API is running' });
+});
+
+// Health check for Database
+app.get('/api/db-health', async (req, res) => {
+  try {
+    await sequelize.authenticate();
+    res.status(200).json({ status: 'OK', message: 'Database is connected' });
+  } catch (err) {
+    res.status(500).json({ status: 'ERROR', message: err.message });
+  }
 });
 
 // Error handling middleware
@@ -36,13 +46,13 @@ const startServer = async () => {
   try {
     await sequelize.authenticate();
     console.log('Database connection established successfully.');
-    
+
     // Sync database (in development)
     if (process.env.NODE_ENV === 'development') {
       await sequelize.sync({ alter: true });
       console.log('Database synced.');
     }
-    
+
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

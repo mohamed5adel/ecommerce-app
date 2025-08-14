@@ -1,37 +1,36 @@
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false, // ما يقبلش NULL
+      validate: {
+        notEmpty: true // ما يقبلش قيمة فاضية ""
+      }
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: true
+      }
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: true, // ما يتكرررش
       validate: {
-        isEmail: true
+        notEmpty: true,
+        isEmail: true // يتحقق إنه إيميل صحيح
       }
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false
-    },
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    lastName: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    isAdmin: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+        len: [6, 100] // طول الباسورد بين 6 و100 حرف
+      }
     }
-  }, {
-    tableName: 'users',
-    timestamps: true
   });
 
   return User;
