@@ -1,0 +1,3 @@
+postgres-data/
+echo ".terraform/" >> .gitignore
+
