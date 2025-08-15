@@ -3,6 +3,10 @@
 *.env
 cat.env
 
+infra/terraform/terraform-files.zip
+infra/terraform/.terraform/
+
+
 # Node.js dependencies
 node_modules/
 npm-debug.log
