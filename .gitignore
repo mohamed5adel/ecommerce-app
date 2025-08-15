@@ -1,3 +1,37 @@
-postgres-data/
-.terraform/
+# Sensitive env files
+.env
+*.env
+cat.env
 
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Database data
+postgres-data/
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+logs/
+debug.log
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Terraform / Infrastructure
+.terraform/
+*.tfstate
+*.tfstate.backup
+crash.log
+
+# Docker
+*.pid
+*.sock

@@ -105,7 +105,7 @@ subjects:
   name: nginx-ingress-serviceaccount
   namespace: ingress-nginx
 ---
-# Ingress for the application
+# Ingress for the application - Modified to allow any host
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -116,8 +116,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: devops-demo.local  # Change this to your domain
-    http:
+  - http:
       paths:
       - path: /
         pathType: Prefix
@@ -126,4 +125,37 @@ spec:
             name: devops-demo-app-service
             port:
               number: 80
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-demo-app-service
+  labels:
+    app: devops-demo-app
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: devops-demo-app
+---
+# NodePort service for direct access (useful for testing)
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-demo-app-nodeport
+  labels:
+    app: devops-demo-app
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 3000
+    nodePort: 30000
+    protocol: TCP
+    name: http
+  selector:
+    app: devops-demo-app
