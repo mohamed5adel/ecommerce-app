@@ -1,0 +1,44 @@
+# Sensitive environment files
+.env
+*.env
+cat.env
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-error.log
+
+# PostgreSQL data
+postgres-data/
+postgres_data/
+
+# Terraform downloaded providers and state
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Large Terraform archive
+infra/terraform/terraform-files.zip
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+logs/
+debug.log
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Docker runtime files
+*.pid
+*.sock
+
+infra/terraform/terraform.tfvars
